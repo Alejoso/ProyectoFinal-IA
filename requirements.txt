@@ -1,0 +1,21 @@
+# Core
+pandas==2.2.3
+numpy==1.26.4
+scikit-learn==1.5.2
+matplotlib==3.9.2
+seaborn==0.13.2
+
+# Notebooks
+jupyter==1.1.1
+ipykernel==6.29.5
+
+# Groq
+python-dotenv==1.0.1
+groq==0.13.0
+
+# RAG
+langchain==0.3.7
+langchain-community==0.3.5
+sentence-transformers==3.3.0
+chromadb==0.5.18
+pypdf==5.1.0
