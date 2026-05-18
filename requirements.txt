@@ -1,21 +1,32 @@
-# Core
+# ---------- Core: análisis de datos y ML ----------
 pandas==2.2.3
 numpy==1.26.4
 scikit-learn==1.5.2
+scipy==1.14.1
 matplotlib==3.9.2
 seaborn==0.13.2
+joblib==1.4.2
 
-# Notebooks
+# ---------- Notebooks ----------
 jupyter==1.1.1
 ipykernel==6.29.5
+nest-asyncio==1.6.0     
 
-# Groq
-python-dotenv==1.0.1
-groq==0.13.0
-
-# RAG
+# ---------- LangChain stack ----------
 langchain==0.3.7
-langchain-community==0.3.5
-sentence-transformers==3.3.0
+langchain-core>=0.3.0,<1.0
+langchain-community>=0.3.0,<0.4
+langchain-groq>=0.2.0,<0.3
+
+# ---------- RAG: vector store + embeddings ----------
 chromadb==0.5.18
+sentence-transformers==3.3.0
 pypdf==5.1.0
+
+# ---------- LLM API ----------
+groq==0.13.0
+python-dotenv==1.0.1
+
+# ---------- Evaluación del RAG ----------
+ragas==0.2.10
+datasets==3.1.0
