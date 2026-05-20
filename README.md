@@ -69,6 +69,16 @@ Los 4 notebooks deben correrse **en orden**, ya que cada uno depende de los arch
 jupyter notebook
 ```
 
+## Ejecutar el streamlit
+
+En la raiz del proyecto, o donde hayas creado el venv
+
+```bash
+source ./venv/bin/activate
+streamlit run streamlit.py
+```
+
+
 Luego en la interfaz de Jupyter, abrir cada notebook y ejecutar todas las celdas (`Cell → Run All`):
 
 | Notebook | Qué hace | Tiempo aprox. |
