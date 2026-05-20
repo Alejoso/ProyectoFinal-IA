@@ -6,6 +6,7 @@ scipy==1.14.1
 matplotlib==3.9.2
 seaborn==0.13.2
 joblib==1.4.2
+plotly
 
 # ---------- Notebooks ----------
 jupyter==1.1.1

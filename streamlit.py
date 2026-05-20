@@ -402,12 +402,102 @@ def user_input():
 
     return pd.DataFrame([data], columns=FEATURE_NAMES)
 
+
+import seaborn as sns
+import plotly.express as px
+
 input_df = user_input()
+
+# =========================
+# CUSTOM CSS (DARK MODE)
+# =========================
+st.markdown("""
+<style>
+    .section-header {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #e5e7eb;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #374151;
+    }
+    .prediction-card {
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+        margin-bottom: 1rem;
+    }
+    .card-good {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        border-left: 5px solid #10b981;
+    }
+    .card-bad {
+        background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+        border-left: 5px solid #ef4444;
+    }
+    .card-prob {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        border-left: 5px solid #60a5fa;
+    }
+    .card-title {
+        font-size: 0.85rem;
+        color: #cbd5e1;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+    .card-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #f9fafb;
+    }
+    .metrics-box {
+        background: #1f2937;
+        padding: 1.2rem 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+        border: 1px solid #374151;
+    }
+    .metrics-title {
+        font-weight: 600;
+        font-size: 1.05rem;
+        margin-bottom: 0.8rem;
+        color: #f3f4f6;
+    }
+    .metric-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #374151;
+    }
+    .metric-row:last-child {
+        border-bottom: none;
+    }
+    .metric-label {
+        color: #9ca3af;
+        font-weight: 500;
+    }
+    .metric-value {
+        color: #f9fafb;
+        font-weight: 600;
+        font-family: 'Courier New', monospace;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
+# Dark theme for matplotlib
+plt.style.use("dark_background")
+DARK_BG = "#0e1117"
+DARK_CARD = "#1f2937"
+
 
 # =========================
 # PREDICTION
 # =========================
-st.subheader("Prediction")
+st.markdown('<div class="section-header">🎯 Prediction</div>', unsafe_allow_html=True)
 
 prediction = model.predict(input_df)[0]
 prob = model.predict_proba(input_df)[0][1]
@@ -415,79 +505,161 @@ prob = model.predict_proba(input_df)[0][1]
 col1, col2 = st.columns(2)
 
 with col1:
-    st.metric("Prediction", "Bad Credit ❌" if prediction == 1 else "Good Credit ✅")
+    if prediction == 1:
+        st.markdown("""
+        <div class="prediction-card card-bad">
+            <div class="card-title">Prediction</div>
+            <div class="card-value">❌ Bad Credit</div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="prediction-card card-good">
+            <div class="card-title">Prediction</div>
+            <div class="card-value">✅ Good Credit</div>
+        </div>
+        """, unsafe_allow_html=True)
 
 with col2:
-    st.metric("Default Probability", f"{prob:.2%}")
+    st.markdown(f"""
+    <div class="prediction-card card-prob">
+        <div class="card-title">Default Probability</div>
+        <div class="card-value">{prob:.2%}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.progress(float(prob), text=f"Risk level: {prob:.1%}")
+
 
 # =========================
 # MODEL PERFORMANCE
 # =========================
-st.subheader("Model Performance")
+st.markdown('<div class="section-header">📊 Model Performance</div>', unsafe_allow_html=True)
 
-col1, col2 = st.columns(2)
 
-with col1:
-    st.markdown(f"""
-    **Test Metrics (actual)**  
-    - ROC-AUC: {test_metrics['roc_auc']:.4f}  
-    - Accuracy: {test_metrics['accuracy']:.4f}  
-    - F1-score: {test_metrics['f1']:.4f}  
-    - Recall: {test_metrics['recall']:.4f}  
-    - Precision: {test_metrics['precision']:.4f}  
-    """)
+metrics_html = f"""
+<div class="metrics-box">
+    <div class="metrics-title">Test Metrics (actual)</div>
+    <div class="metric-row">
+        <span class="metric-label">ROC-AUC</span>
+        <span class="metric-value">{test_metrics['roc_auc']:.4f}</span>
+    </div>
+    <div class="metric-row">
+        <span class="metric-label">Accuracy</span>
+        <span class="metric-value">{test_metrics['accuracy']:.4f}</span>
+    </div>
+    <div class="metric-row">
+        <span class="metric-label">F1-score</span>
+        <span class="metric-value">{test_metrics['f1']:.4f}</span>
+    </div>
+    <div class="metric-row">
+        <span class="metric-label">Recall</span>
+        <span class="metric-value">{test_metrics['recall']:.4f}</span>
+    </div>
+    <div class="metric-row">
+        <span class="metric-label">Precision</span>
+        <span class="metric-value">{test_metrics['precision']:.4f}</span>
+    </div>
+</div>
+"""
+st.markdown(metrics_html, unsafe_allow_html=True)
 
-with col2:
-    st.info("""
-    ⚠️ Results are computed on the held-out test set loaded from
-    `data/processed/X_test.csv` and `y_test.csv`.  
-    This is the true confusion matrix for the pipeline.
-    """)
 
 # =========================
 # CONFUSION MATRIX
 # =========================
-st.subheader("Confusion Matrix")
+st.markdown('<div class="section-header">🔢 Confusion Matrix</div>', unsafe_allow_html=True)
 
-fig, ax = plt.subplots(figsize=(6, 5))
-disp = ConfusionMatrixDisplay(confusion_matrix=test_cm, display_labels=["Good", "Bad"])
-disp.plot(ax=ax, cmap="Blues", colorbar=False)
-ax.set_title("Test set confusion matrix")
-st.pyplot(fig)
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    fig, ax = plt.subplots(figsize=(6, 5), facecolor=DARK_BG)
+    ax.set_facecolor(DARK_BG)
+    sns.heatmap(
+        test_cm,
+        annot=True,
+        fmt="d",
+        cmap="mako",  # paleta oscura
+        cbar=False,
+        xticklabels=["Good", "Bad"],
+        yticklabels=["Good", "Bad"],
+        annot_kws={"size": 16, "weight": "bold", "color": "#f9fafb"},
+        linewidths=1,
+        linecolor=DARK_BG,
+        ax=ax
+    )
+    ax.set_xlabel("Predicted", fontsize=12, fontweight="bold", color="#e5e7eb")
+    ax.set_ylabel("Actual", fontsize=12, fontweight="bold", color="#e5e7eb")
+    ax.set_title("Test Set Confusion Matrix", fontsize=14, fontweight="bold", pad=15, color="#f9fafb")
+    ax.tick_params(colors="#cbd5e1")
+    plt.tight_layout()
+    st.pyplot(fig)
+
 
 # =========================
 # FEATURE IMPORTANCE
 # =========================
-st.subheader("Feature Importance")
+st.markdown('<div class="section-header">🌟 Feature Importance</div>', unsafe_allow_html=True)
 
 features = [
     "estado_cuenta", "monto_credito", "duracion_meses",
     "edad", "ahorros", "empleo_actual",
     "tasa_pago_pct_ingreso"
 ]
-
 importance = [0.1526, 0.1181, 0.0875, 0.0814, 0.0587, 0.0517, 0.0354]
 
 df_imp = pd.DataFrame({
     "Feature": features,
     "Importance": importance
-}).sort_values(by="Importance", ascending=False)
+}).sort_values(by="Importance", ascending=True)
 
-st.bar_chart(df_imp.set_index("Feature"))
+fig = px.bar(
+    df_imp,
+    x="Importance",
+    y="Feature",
+    orientation="h",
+    color="Importance",
+    color_continuous_scale="Viridis",  # se ve genial en oscuro
+    text=df_imp["Importance"].apply(lambda x: f"{x:.4f}")
+)
+fig.update_traces(
+    textposition="outside",
+    textfont=dict(color="#e5e7eb")
+)
+fig.update_layout(
+    showlegend=False,
+    coloraxis_showscale=False,
+    plot_bgcolor=DARK_BG,
+    paper_bgcolor=DARK_BG,
+    font=dict(color="#e5e7eb"),
+    height=400,
+    margin=dict(l=20, r=40, t=20, b=20),
+    xaxis=dict(showgrid=True, gridcolor="#374151", title="", color="#cbd5e1"),
+    yaxis=dict(title="", color="#cbd5e1")
+)
+st.plotly_chart(fig, use_container_width=True)
+
 
 # =========================
 # RAG DEMO (OPTIONAL)
 # =========================
-st.subheader("Regulatory Q&A (RAG)")
+st.markdown('<div class="section-header">📚 Regulatory Q&A (RAG)</div>', unsafe_allow_html=True)
 
-query = st.text_input("Ask about credit risk regulation:")
+with st.container(border=True):
+    query = st.text_input(
+        "Ask about credit risk regulation:",
+        placeholder="e.g., What are the capital requirements under Basel III?"
+    )
+    ask = st.button("🔍 Ask", type="primary", use_container_width=False)
 
-if query and st.button("Ask"):
-    results = retrieve(retriever, query, top_k=3)
+if query and ask:
+    with st.spinner("Searching corpus..."):
+        results = retrieve(retriever, query, top_k=3)
+
     if not results:
         st.info("No relevant document snippets found for that query.")
     else:
-        st.markdown("**Top RAG results from the local corpus:**")
-        for result in results:
-            with st.expander(f"{result['title']} — score {result['score']:.2f}"):
-                st.write(result["text"][:800] + ("..." if len(result["text"]) > 800 else ""))
+        st.success(f"Found {len(results)} relevant results from the local corpus")
+        for i, result in enumerate(results, start=1):
+            with st.expander(f"📄 #{i} — {result['title']} · score {result['score']:.2f}"):
+                text = result["text"][:800] + ("..." if len(result["text"]) > 800 else "")
+                st.markdown(text)
